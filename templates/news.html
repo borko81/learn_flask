@@ -3,12 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
 </head>
 <body>
-    <h1>Headlines</h1>
-    <b>{{ context.title }}</b><br/>
-    <p>{{ context.description }}</p>
-    <a href='{{ context.link }}'><i>link</i></a><br/>
-    <small>{{ context.category }}</small>
+<div class="container">
+    <form action="">
+        <div class="input-group">
+            <input type="text" placeholder="search" name="title" class="form-control">
+            <button class="btn btn-primary">Search</button>
+        </div>
+    </form>
+    {% if one_new == 1 %}
+        <h1>{{ context.title }}</h1><br/>
+        <p>{{ context.description }}</p>
+        <a href='{{ context.link }}'><i>link</i></a><br/>
+        <small>{{ context.category }}</small>
+    {% else %}
+        {% for article in context %}
+            <h1>{{ article.title }}</h1><br/>
+            <p>{{ article.description }}</p>
+            <a href='{{ article.link }}'><i>link</i></a><br/>
+            <small>{{ article.category }}</small>
+            <hr/>
+        {% endfor %}
+    {% endif %}
+</div>
 </body>
 </html>
