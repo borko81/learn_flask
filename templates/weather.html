@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+          integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <title>Title</title>
+</head>
+<body>
+<div class="container">
+
+    <form action="{{ url_for('town_weather') }}">
+        <div class="input-group">
+            <input type="text" placeholder="Enter town for weather" class="form-control" name="q">
+            <button class="btn btn-primary">Load</button>
+        </div>
+    </form>
+
+    <table class="table">
+        <thead class="thead-dark">
+        <tr>
+            <th>Град</th>
+            <th>Температура</th>
+        </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>{{ context.CITY }}</td>
+                <td>{{ context.CONTENT }}&#8451;</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</body>
+</html>
