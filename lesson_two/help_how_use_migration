@@ -1,0 +1,7 @@
+from flask_migration import Migrate
+
+migrate = Migrate(app, db)
+
+flask db init
+flask db migrate -m "Some message|"
+flask db upgrade
