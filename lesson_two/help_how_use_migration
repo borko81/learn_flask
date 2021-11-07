@@ -1,6 +1,6 @@
 from flask_migration import Migrate
 
-migrate = Migrate(app, db)
+migrate = Migrate(app, db, compare_type=True)
 
 flask db init
 flask db migrate -m "Some message|"
