@@ -13,13 +13,36 @@ db = SQLAlchemy(app)
 api = Api(app)
 migrate = Migrate(app, db, compare_type=True)
 ma = Marshmallow(app)
+import datetime
+
+
+class TestModel(db.Model):
+    __tablename__ = 'testtable'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('myuser.id'))
+    user_email = db.Column(db.String(250), default=None)
+    income = db.Column(db.DateTime, default=datetime.datetime.today())
+    outcome = db.Column(db.DateTime, nullable=True)
+    price = db.Column(db.Integer, nullable=True)
+
+    def __repr__(self):
+        return str(self.id)
+
+    def save(self):
+        if self.outcome:
+            self.price = 1
+        self.user_email = UserModel.query.filter_by(id=self.user_id).first().email
+        db.session.add(self)
+        db.session.commit()
 
 
 class UserModel(db.Model):
     __tablename__ = 'myuser'
-    email = db.Column(db.String(250), primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    email = db.Column(db.String(250), unique=True)
     password = db.Column(db.String(250))
     create_on = db.Column(db.DateTime, default=datetime.datetime.now())
+    test_ref = db.relationship('TestModel', lazy='dynamic', backref='test_ref')
 
     def save(self):
         self.password = generate_password_hash(self.password)
@@ -36,7 +59,7 @@ class BookModel(db.Model):
     title = db.Column(db.String, nullable=False)
     author = db.Column(db.String, nullable=False)
     reader_pk = db.Column(db.Integer, db.ForeignKey('readers.pk'))
-    reader = db.relationship('ReaderModel')
+    reader = db.relationship('ReaderModel', backref='reader')
 
     def __repr__(self):
         return f"<{self.pk}> {self.title} from {self.author}"
@@ -54,7 +77,6 @@ class ReaderModel(db.Model):
     pk = db.Column(db.Integer, primary_key=True)
     first_name = db.Column(db.String, nullable=False)
     last_name = db.Column(db.String, nullable=False)
-    books = db.relationship("BookModel", backref="book", lazy='dynamic')
 
 
 class Books(Resource):
@@ -82,8 +104,23 @@ class BookSchema(ma.SQLAlchemyAutoSchema):
         model = BookModel
         include_relationships = True
 
+
+class UserSchema(ma.Schema):
+    class Meta:
+        model = UserModel
+        fields = 'id email create_on'.split()
+
+
+class UserResourse(Resource):
+    def get(self):
+        user = UserModel.query.first()
+        schema = UserSchema()
+        return schema.dump(user)
+
+
 api.add_resource(Books, "/")
 api.add_resource(ReaderResourse, '/reader/<int:_id>')
+api.add_resource(UserResourse, '/users')
 
 if __name__ == '__main__':
     app.run(debug=True)
