@@ -4,16 +4,17 @@ from flask_restful import Resource, Api, fields, marshal_with
 from flask_migrate import Migrate
 from flask_marshmallow import Marshmallow
 import datetime
+import os
 from werkzeug.security import check_password_hash, generate_password_hash
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = f'postgresql://postgres:local60@localhost:5432/flask_su'
+app.config['SQLALCHEMY_DATABASE_URI'] = f'postgresql://{os.getenv("USER_NAME_FOR_DB")}:{os.getenv("PASSWORD_FOR_DB")}@{os.getenv("HOST_DB")}:5432/{os.getenv("PATH_TO_BASE")}'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 api = Api(app)
-migrate = Migrate(app, db, compare_type=True)
+migrate = Migrate(app, db)
 ma = Marshmallow(app)
-import datetime
+
 
 
 class TestModel(db.Model):
@@ -39,7 +40,7 @@ class TestModel(db.Model):
 class UserModel(db.Model):
     __tablename__ = 'myuser'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    email = db.Column(db.String(250), unique=True)
+    email = db.Column(db.String(200), unique=True)
     password = db.Column(db.String(250))
     create_on = db.Column(db.DateTime, default=datetime.datetime.now())
     test_ref = db.relationship('TestModel', lazy='dynamic', backref='test_ref')
@@ -75,7 +76,7 @@ class BookModel(db.Model):
 class ReaderModel(db.Model):
     __tablename__ = 'readers'
     pk = db.Column(db.Integer, primary_key=True)
-    first_name = db.Column(db.String, nullable=False)
+    first_name = db.Column(db.String(100), nullable=False)
     last_name = db.Column(db.String, nullable=False)
 
 
