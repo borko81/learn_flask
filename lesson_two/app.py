@@ -136,6 +136,7 @@ class TestModelResourse(Resource):
 
     @marshal_with(resourse_field)
     def get(self):
+        """Get request"""
         result = TestModel.query.one()
         return result
 
