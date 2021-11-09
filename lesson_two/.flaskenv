@@ -1,6 +1,0 @@
-FLASK_APP=app.py
-FLASK_DEBUG=True
-PATH_TO_BASE=flask_su
-USER_NAME_FOR_DB=postgres
-PASSWORD_FOR_DB=local60
-HOST_DB=localhost
