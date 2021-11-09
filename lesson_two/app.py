@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
-from flask_restful import Resource, Api
+from flask_restful import Resource, Api, fields, marshal_with
 from flask_migrate import Migrate
 from flask_marshmallow import Marshmallow
 import datetime
@@ -118,9 +118,31 @@ class UserResourse(Resource):
         return schema.dump(user)
 
 
+class TestModelResourse(Resource):
+    """
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('myuser.id'))
+    user_email = db.Column(db.String(250), default=None)
+    income = db.Column(db.DateTime, default=datetime.datetime.today())
+    outcome = db.Column(db.DateTime, nullable=True)
+    price = db.Column(db.Integer, nullable=True)
+    """
+    resourse_field = {
+        "id": fields.Integer,
+        "user_id": fields.Integer,
+        "user_email": fields.String
+    }
+
+    @marshal_with(resourse_field)
+    def get(self):
+        result = TestModel.query.one()
+        return result
+
+
 api.add_resource(Books, "/")
 api.add_resource(ReaderResourse, '/reader/<int:_id>')
 api.add_resource(UserResourse, '/users')
+api.add_resource(TestModelResourse, '/test')
 
 if __name__ == '__main__':
     app.run(debug=True)
