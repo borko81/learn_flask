@@ -1,7 +1,9 @@
+# import module who not direct access to flask
 from datetime import datetime, timedelta
 import enum
 from functools import wraps
 
+# Flask module and what i need
 import jwt
 from decouple import config
 from flask import Flask, request, jsonify
@@ -14,11 +16,13 @@ from password_strength import PasswordPolicy
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_httpauth import HTTPTokenAuth
 
+# Configuration
 app = Flask(__name__)
 db_user = config('USER_NAME_FOR_DB')
 db_password = config('PASSWORD_FOR_DB')
 path = config('PATH_TO_BASE')
 
+# TODO Maybe in class method?
 app.config['SQLALCHEMY_DATABASE_URI'] = f'postgresql://{db_user}:{db_password}@localhost:5432/{path}'
 
 db = SQLAlchemy(app)
@@ -28,12 +32,18 @@ auth = HTTPTokenAuth(scheme='Bearer')
 
 
 @auth.verify_token
-def verify_token(token):
+def verify_token(token: str):
+    """
+    Verify token
+    :param token:
+    :return:
+    """
     try:
         user_id = User.decode_token(token)
         return User.find_by_id(user_id)
     except Exception:
         abort(400)
+        # return 400
 
 
 # Enum's
@@ -44,6 +54,10 @@ class ColorEmun(enum.Enum):
     yellow = "Yellow"
 
     def __str__(self):
+        """
+        Because need to return value not ColorEmun.key
+        :return:
+        """
         return self.value
 
 
@@ -67,7 +81,7 @@ class UserRolesEnum(enum.Enum):
 
 class User(db.Model):
     """
-    User model, use func.now() to get time from server ,not by client
+    User model, use func.now() to get time from server ,not by client???
     """
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(120), nullable=False, unique=True)
@@ -83,6 +97,10 @@ class User(db.Model):
     )
 
     def encode_token(self):
+        """
+        Encode token, after success login
+        :return:
+        """
         try:
             payload = {
                 'exp': datetime.utcnow() + timedelta(days=2),
@@ -99,6 +117,11 @@ class User(db.Model):
 
     @staticmethod
     def decode_token(auth_token):
+        """
+        Decode token
+        :param auth_token:
+        :return:
+        """
         try:
             key = config('SECRET_KEY')
             payload = jwt.decode(jwt=auth_token, key=key,  algorithms=["HS256"])
@@ -151,13 +174,6 @@ class Clothes(db.Model):
         db.session.add(self)
         db.session.commit()
 
-class ClothesSchema(Schema):
-    id = fields.Integer()
-    name = fields.String()
-    color = fields.String()
-    size = fields.String()
-    proho = fields.String()
-
 
 # Policies
 policy = PasswordPolicy.from_names(
@@ -171,28 +187,49 @@ name_policy = PasswordPolicy.from_names(
 
 
 def validate_password(value):
+    """
+    Validate if password is ok or not use policy
+    :param value:
+    :return:
+    """
     errors = policy.test(value)
     if errors:
         raise ValidationError("Not valid password try again")
 
 
 def validate_full_name(value):
+    """
+    Validate full name has 1 or more upper case letter
+    :param value:
+    :return: raise ValidationError, when not correct value (full_name)
+    """
     errors = name_policy.test(value)
     if errors:
         raise ValidationError("Not correct name!")
 
 
-# Tokens
-
-
 # Schema's
 class BaseUserShema(Schema):
+    """
+    Use this when i return data to frontend, maybe one more to show only full_name?
+    """
     email = fields.Email(required=True, validate=validate.Email())
     full_name = fields.String(required=True, validate=validate.And(validate_full_name))
 
 
 class UserSignInSchema(BaseUserShema):
     password = fields.String(required=True, validate=validate.And(validate_password))
+
+
+class ClothesSchema(Schema):
+    """
+    Use to return json obj  when success hit endpoint
+    """
+    id = fields.Integer()
+    name = fields.String()
+    color = fields.String()
+    size = fields.String()
+    photo = fields.String()
 
 
 # Resource's
