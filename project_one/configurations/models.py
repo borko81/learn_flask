@@ -34,13 +34,18 @@ class User(db.Model):
         except Exception as er:
             raise er
 
-    def decode_token(self, auth_token):
+    @staticmethod
+    def decode_token(auth_token):
         try:
             key = config('SECRET_KEY')
-            payload = jwt.decode(jwt=auth_token, key=key, algorithms=['HS256'])
+            payload = jwt.decode(jwt=auth_token, key=key,  algorithms=["HS256"])
             return payload['sub']
-        except Exception as er:
-            raise er
+        except jwt.ExpiredSignatureError as ex:
+            raise ex
+        except jwt.InvalidTokenError as ex:
+            raise ex
+        except Exception as ex:
+            raise ex
 
 
     @classmethod
