@@ -267,6 +267,7 @@ def permission_required(permission):
 
 class ClothesRouter(Resource):
     @auth.login_required
+    @permission_required(UserRolesEnum.user)
     def get(self):
         current_user = auth.current_user()
         clothes = Clothes.query.all()
