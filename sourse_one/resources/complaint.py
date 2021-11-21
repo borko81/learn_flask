@@ -7,22 +7,21 @@ from flask import request
 
 from schemas.request.complain import RequestComplainSchema
 from schemas.response.complaint import ComplaintResponseSchema
-from utils.validate_schemas import validate_schema
+from utils.decorators import validate_schame
 
 
-
-class CompplaintListCreate(Resource):
+class ComplaintListCreate(Resource):
     @auth.login_required
-    @validate_schema(RequestComplainSchema)
+    @validate_schame(RequestComplainSchema)
     def get(self):
         user = auth.current_user()
         complains = ComplaintManager.get_all_complainer_claims(user)
         return ComplaintResponseSchema().dump(complains, many=True)
 
     @auth.login_required
-    @validate_schema(RequestComplainSchema)
+    @validate_schame(RequestComplainSchema)
     def post(self):
         complainer = auth.current_user()
         data = request.get_json()
-        complaint = ComplaintManager.create(data, complainer.id)
-        return ComplaintResponseSchema().dump(complaint)
+        complain = ComplaintManager.create(data, complainer.id)
+        return ComplaintResponseSchema().dump(complain)

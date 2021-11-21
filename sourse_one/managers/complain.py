@@ -6,7 +6,7 @@ class ComplaintManager:
     @staticmethod
     def get_all_complainer_claims(user):
         if isinstance(user, ComplaintModel):
-            return ComplaintModel.query.filter_by(complainer_id=user.id).all()
+            return ComplaintModel.query.filter_by(complainer_if=user.id).all()
         return ComplaintModel.query.all()
 
     @staticmethod
